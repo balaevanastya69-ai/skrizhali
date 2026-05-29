@@ -1,0 +1,1547 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Скрижали Адаптивности — предзапись</title>
+<meta name="description" content="Четыре онлайн-занятия. Три метафоры. Адаптивность как способ, а не как идея." />
+
+<!--
+  ШРИФТЫ
+  ------
+  Дисплейный (заголовки): Kanit Cyrillic — лежит локально в /fonts/.
+    Лицензия: SIL Open Font License 1.1 (свободная, в т.ч. для коммерции).
+    Файлы лицензии лежат рядом: /fonts/OFL.txt и /fonts/COPYRIGHT.txt —
+    их обязательно держать вместе со шрифтом при размещении на хостинге.
+    Один вес (Regular 400); иерархия строится размером, трекингом и цветом.
+
+  Текстовый: Nunito — подключён с Google Fonts CDN. Можно оставить так
+  или скачать в /fonts/ и раскомментировать локальный блок ниже.
+
+  Длинное тире «—»: в Kanit его нет, поэтому для одного символа U+2014
+  подключён системный шрифт через unicode-range — тире берётся из
+  Georgia/Times, остальные знаки остаются Kanit. Это незаметная замена.
+
+  ПАПКА /fonts/ при выкладке на хостинг должна содержать:
+    KanitCyrillic.woff2   (основной, лёгкий)
+    Kanit_Cyrillic.ttf    (резервный)
+    OFL.txt, COPYRIGHT.txt (обязательно по условиям лицензии)
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<style>
+/* ---- Kanit Cyrillic: дисплейный шрифт, локальный (OFL 1.1) ---- */
+@font-face {
+  font-family: "Kanit Cyrillic";
+  src: url("./fonts/KanitCyrillic.woff2") format("woff2"),
+       url("./fonts/Kanit_Cyrillic.ttf") format("truetype");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+/* ---- Длинное тире из системной антиквы только для U+2014 ---- */
+@font-face {
+  font-family: "EmDashFallback";
+  src: local("Georgia"), local("Times New Roman"), local("Times");
+  unicode-range: U+2014;
+}
+
+/*
+  Локальный Nunito — если решите хостить шрифт у себя, скачайте файлы
+  в /fonts/ и раскомментируйте блок, затем удалите <link> на Google Fonts.
+
+@font-face { font-family: "Nunito"; src: url("./fonts/Nunito-Light.woff2") format("woff2");    font-weight: 300; font-style: normal; font-display: swap; }
+@font-face { font-family: "Nunito"; src: url("./fonts/Nunito-Regular.woff2") format("woff2");  font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: "Nunito"; src: url("./fonts/Nunito-Medium.woff2") format("woff2");   font-weight: 500; font-style: normal; font-display: swap; }
+@font-face { font-family: "Nunito"; src: url("./fonts/Nunito-SemiBold.woff2") format("woff2"); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: "Nunito"; src: url("./fonts/Nunito-Bold.woff2") format("woff2");     font-weight: 700; font-style: normal; font-display: swap; }
+@font-face { font-family: "JetBrains Mono"; src: url("./fonts/JetBrainsMono-Regular.woff2") format("woff2"); font-weight: 400; font-style: normal; font-display: swap; }
+*/
+
+/* ============ tokens ============ */
+:root{
+  /* ТЁПЛАЯ ТЬМА — глубже, чем раньше: больше провала, чтобы матча
+     светилась ярче на контрасте. Уголь с теплом, не плоский чёрный. */
+  --bg:        #15110C;   /* воздух тьмы — основной фон, глубже */
+  --bg-deep:   #0C0A06;   /* глубокие провалы, основания теней */
+  --surface:   #1F1A13;   /* приподнятая поверхность — карточки */
+  --surface-2: #282115;   /* верхний слой / ховер */
+
+  /* свет — кремовый, чуть ярче прежнего: больше контраста с тьмой. */
+  --ink:       #F2EBD9;   /* основной текст — светлее, контрастнее */
+  --muted:     #A8A088;   /* вторичный текст — тёплый таупе */
+  --faint:     #6B6354;   /* третичный / служебный */
+  /* ОБРАМЛЕНИЯ — все линии, разделители, рамки в матче, ярче прежнего. */
+  --rule:      rgba(199,216,154,.20);  /* волосяная линия — матча */
+  --rule-warm: rgba(199,216,154,.42);  /* линия-акцент — матча, ярко */
+  --edge-lit:  rgba(199,216,154,.28);  /* грань, на которую падает свет */
+
+  /* ОРЕОЛ заголовков — почти убран охровый оттенок: лёгкое тёплое
+     свечение осталось еле-еле, чтобы тьма не стала ледяной. */
+  --warm-halo: rgba(216,180,110,.05);
+
+  /* МАТЧА — единственный акцент. Ярче и чуть насыщеннее прежнего:
+     сильнее светится против углублённой тьмы. */
+  --matcha:      #C9DA8E;
+  --matcha-soft: rgba(199,216,154,.17);
+  --matcha-glow: rgba(199,216,154,.32);
+  /* атмосферные пятна матчи — плотнее, дают больше глубины и цвета */
+  --matcha-air-1: rgba(199,216,154,.15);
+  --matcha-air-2: rgba(199,216,154,.10);
+  --matcha-air-3: rgba(199,216,154,.06);
+
+  /* служебные */
+  --dark:  #14110C;       /* тёмный текст на светлой матча-кнопке */
+  --cream: var(--ink);
+
+  --display: "Kanit Cyrillic", "EmDashFallback", Georgia, "Times New Roman", serif;
+  --sans:    "Nunito", system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+  --mono:    "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+
+  /* fluid scale — под Kanit Cyrillic (капс-гротеск) и тёмный фон.
+     Капс-гротеск читается компактно — заголовки укрупнены примерно
+     на 12–16% против прежнего, чтобы иерархия звучала отчётливее. */
+  --t-hero:  clamp(30px, 8.9vw, 132px);  /* герой — крупно; на узких экранах ужимается, но «Адаптивности» всегда в строку */
+  --t-h1:    clamp(29px, 5.4vw, 76px);   /* sec-h */
+  --t-h2:    clamp(25px, 4.1vw, 56px);   /* l-title */
+  --t-h3:    clamp(21px, 2.7vw, 33px);
+  --t-lead:  clamp(18px, 1.65vw, 23px);
+  --t-body:  clamp(16px, 1.15vw, 18px);
+  --t-small: clamp(13px, 0.92vw, 14.5px);
+  --t-mono:  clamp(11px, 0.78vw, 12.5px);
+  --t-numeral: clamp(46px, 7vw, 104px);  /* крупная тихая римская цифра */
+
+  --pad-x:   clamp(18px, 5vw, 88px);
+  --gap-sec: clamp(84px, 14vw, 208px);
+
+  /* fixed CTA size, used for spacing too */
+  --cta-h: 52px;
+}
+
+*,*::before,*::after{ box-sizing: border-box; }
+html,body{ margin:0; padding:0; }
+html{ -webkit-text-size-adjust: 100%; }
+body{
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: var(--t-body);
+  line-height: 1.62;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+  position: relative;
+  /* осторожный wrap для body — заголовки явно отключают это правило ниже */
+  overflow-wrap: break-word;
+  /* leave room for fixed CTAs at bottom */
+  padding-bottom: calc(var(--cta-h) + 32px + env(safe-area-inset-bottom));
+}
+/* атмосфера: матча-свет в глубине + виньетка по краям.
+   Виньетка топит периметр в темноту — страница ощущается глубже,
+   а световые пятна и матча в центре светятся ярче на контрасте. */
+body::before{
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(58% 36% at 78% 3%,  var(--matcha-air-1), transparent 68%),
+    radial-gradient(50% 30% at 7% 31%,  var(--matcha-air-2), transparent 70%),
+    radial-gradient(68% 38% at 91% 88%, var(--matcha-air-3), transparent 70%),
+    radial-gradient(125% 105% at 50% 42%, transparent 52%, var(--bg-deep) 100%);
+}
+/* тонкая плёночная фактура — материальный минимализм, не «пустота» */
+body::after{
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  opacity: .5;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/></svg>");
+}
+/* контент — над атмосферой */
+.topbar, .hero, section, .wrap > .disclaimer, footer, .fixed-cta{ position: relative; z-index: 1; }
+img{ display:block; max-width:100%; height:auto; }
+a{ color: inherit; }
+button{ font: inherit; color: inherit; }
+/* «Акцент» — приём бренда: различение цветом и весом, без наклона.
+   Курсив на сайте не используется. */
+em{ font-style: normal; }
+
+::selection{ background: rgba(199,216,154,.34); color: var(--ink); }
+
+/* ============ utilities ============ */
+.wrap{
+  width: 100%;
+  max-width: 1320px;
+  margin: 0 auto;
+  padding-left: var(--pad-x);
+  padding-right: var(--pad-x);
+}
+.mono{
+  font-family: var(--mono);
+  font-size: var(--t-mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 400;
+  line-height: 1.4;
+}
+.mono.ink{ color: var(--ink); }
+.mono.ochre{ color: var(--matcha); }
+.ochre{ color: var(--matcha); }
+.tnum{ font-variant-numeric: tabular-nums; }
+
+/* «акцент» вместо курсива — другой вес + тёплый цвет */
+.acc{ color: var(--matcha); font-weight: 500; }
+.sec-h .acc{ font-weight: 500; }
+.hero-title .acc{ font-weight: 500; color: var(--matcha); }
+
+/* полупрозрачные подсветки ключевых мест в тексте, обе — матча.
+   .mark — мягкая подложка (текст кремовый);
+   .mark-life — подложка + матча-текст (живое понятие, точка жизни). */
+.mark{
+  background: var(--matcha-soft);
+  box-shadow: 0 0 0 .14em var(--matcha-soft);
+  border-radius: .14em;
+  color: var(--ink);
+}
+.mark-life{
+  background: var(--matcha-soft);
+  box-shadow: 0 0 0 .14em var(--matcha-soft);
+  border-radius: .14em;
+  color: var(--matcha);
+  font-weight: 500;
+}
+
+/* ============ top bar ============ */
+.topbar{
+  position: relative;
+  padding-top: clamp(20px, 3vw, 36px);
+  padding-bottom: clamp(20px, 3vw, 36px);
+}
+.topbar .row{
+  display:flex; align-items:center; justify-content:space-between;
+  gap: 12px;
+}
+.brand{
+  font-family: var(--display);
+  font-weight: 500;
+  font-size: clamp(13px, 1vw, 15px);
+  letter-spacing: .02em;
+  white-space: nowrap;
+}
+.brand .dot{
+  display:inline-block; width:5px; height:5px; border-radius:50%;
+  background: var(--matcha); vertical-align: middle; margin: 0 .55em;
+  transform: translateY(-2px);
+}
+.brand .sub{ color: var(--muted); font-weight: 400; }
+.topbar .status{ text-align: right; }
+@media (max-width: 520px){
+  .topbar .status .long{ display: none; }
+  .brand .sub{ display: none; }
+  .brand .dot{ display: none; }
+}
+
+/* ============ hero ============ */
+.hero{
+  position: relative;
+  padding-top: clamp(28px, 5vw, 72px);
+  padding-bottom: clamp(20px, 3vw, 44px);
+  overflow: hidden;
+}
+
+/* базовый флекс-контейнер (используется плашками-фактами) */
+.chips{
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: stretch;
+  gap: clamp(14px, 2vw, 28px);
+}
+
+.hero-title,
+.sec-h,
+.l-title,
+.sprout .what,
+.cta-h-h2,
+.tier .price{
+  /* запрещаем перенос внутри слова в крупных заголовках */
+  overflow-wrap: normal;
+  word-break: keep-all;
+  hyphens: manual;
+}
+/* огромный заголовок — почти во всю ширину верхнего блока.
+   Название бренда переносу не подлежит: каждое слово — своя строка,
+   и внутри слова перенос запрещён (никакого разрыва на любом экране). */
+.hero-title{
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: var(--t-hero);
+  line-height: 0.96;
+  letter-spacing: 0.005em;
+  text-transform: uppercase;
+  margin: 0;
+  color: var(--ink);
+  text-shadow: 0 1px 40px var(--warm-halo);
+}
+.hero-title .l1,
+.hero-title .l2{
+  display: block;
+  white-space: nowrap;       /* слово всегда целиком в одну строку */
+  overflow-wrap: normal;
+  word-break: keep-all;
+}
+.hero-title .l2{ color: var(--matcha); }
+
+/* нижняя строка героя: на десктопе статус слева, факты справа;
+   на мобильном — статус, под ним факты в ряд. */
+.hero-foot{
+  margin-top: clamp(32px, 5vw, 64px);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(28px, 4vw, 44px);
+}
+@media (min-width: 760px){
+  .hero-foot{
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: clamp(32px, 6vw, 96px);
+  }
+}
+.hero-status{ max-width: 42ch; }
+.hero-status .label{ margin-bottom: 12px; }
+.hero-status-text{
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: var(--t-lead);
+  line-height: 1.5;
+  color: var(--ink);
+  text-wrap: pretty;
+}
+
+/* три факта 4 / 3 / 20–40 — без рамок, только цифра и подпись.
+   Крупные промежутки между собой; справа от статуса на десктопе. */
+.chips-facts{
+  flex-wrap: nowrap;
+  gap: clamp(20px, 4vw, 56px);
+  align-items: flex-start;
+}
+.fact{
+  display: block;
+  text-align: left;
+  flex: 0 0 auto;
+}
+.fact-n{
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(26px, 2.9vw, 40px);
+  line-height: 1;
+  color: var(--matcha);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+.fact-l{ margin-top: 9px; }
+
+/* тонкая вертикальная отметка-матча справа от hero */
+.hero::after{
+  content: "";
+  position: absolute;
+  top: clamp(40px, 7vw, 90px);
+  right: clamp(-2px, 1vw, 14px);
+  width: 1px; height: clamp(60px, 12vw, 160px);
+  background: var(--matcha);
+  opacity: .55;
+}
+
+/* ============ section frame ============ */
+section{ position: relative; padding-top: var(--gap-sec); padding-bottom: 0; }
+/* первый раздел стоит ближе к герою — меньше пустоты под ним */
+#manifest{ padding-top: clamp(48px, 8vw, 120px); }
+
+/* ============ video — интерлюдия между героем и манифестом ============
+   Стоит сразу под плашками. Воздух сверху умеренный (меньше большого
+   межсекционного --gap-sec), снизу зазор даёт padding-top манифеста. */
+#intro-video{ padding-top: clamp(56px, 9vw, 132px); }
+.video-frame{
+  /* видео не во всю ширину блока: присутствует, но не подавляет.
+     По ширине сопоставимо с карточками-уроками. */
+  max-width: 920px;
+  margin: 0 auto;
+}
+.video-frame video{
+  width: 100%;
+  height: auto;
+  display: block;
+  aspect-ratio: 16 / 9;          /* стабильная геометрия до загрузки */
+  object-fit: cover;
+  background: var(--bg-deep);
+  border-radius: 14px;
+  /* тёплое матча-кольцо + глубокая тень — как у карточек и фото команды */
+  box-shadow:
+    0 0 0 1px var(--matcha-soft),
+    0 28px 56px -36px rgba(0,0,0,.8);
+}
+.sec-head{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(14px, 2vw, 24px);
+  margin-bottom: clamp(36px, 6vw, 72px);
+}
+@media (min-width: 900px){
+  .sec-head{
+    grid-template-columns: minmax(180px, 22%) minmax(0, 1fr);
+    gap: clamp(24px, 4vw, 80px);
+  }
+}
+.sec-num{
+  display: flex; flex-direction: column; align-items: flex-start;
+  gap: clamp(8px, 1vw, 14px);
+}
+/* крупная тихая римская цифра — глубина и навигация, не крик */
+.sec-num .n{
+  font-family: var(--display); font-weight: 400;
+  font-size: var(--t-numeral);
+  line-height: .82;
+  color: var(--matcha);
+  opacity: .34;
+  letter-spacing: 0;
+}
+.sec-h{
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: var(--t-h1);
+  line-height: 1.16;
+  letter-spacing: 0.028em;
+  text-transform: uppercase;
+  margin: 0;
+  text-wrap: balance;
+  color: var(--ink);
+  text-shadow: 0 1px 36px var(--warm-halo);
+}
+.sec-h em{ font-weight: 400; color: var(--matcha); }
+
+/* вводный абзац под заголовком раздела — единый стиль для всех секций
+   (manifest / sprouts), Nunito, одинаковый размер ради конгруэнтности */
+.manifest-intro,
+.sprouts-intro{
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: clamp(17px, 1.55vw, 21px);
+  line-height: 1.6;
+  max-width: 64ch;
+  margin: 0 0 clamp(32px, 5vw, 56px);
+  color: var(--muted);
+  text-wrap: pretty;
+}
+
+/* ============ manifest ============ */
+/* единая колонка: сверху белый текст, под ним — лесенка плашек.
+   Первая плашка стартует ровно под текстом и на той же ширине. */
+.manifest{
+  display: block;
+}
+.manifest p.lead{
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: clamp(17px, 1.7vw, 22px);
+  line-height: 1.6;
+  letter-spacing: 0;
+  margin: 0 0 clamp(28px, 4vw, 48px);
+  color: var(--ink);
+  text-wrap: pretty;
+  max-width: 52ch;  /* ширина текстового блока — её же наследует 1-я плашка */
+}
+
+/* три плашки-«ступени»: на десктопе спускаются лесенкой,
+   на мобильном — простой вертикальный список. */
+.manifest-aside{
+  display: grid;
+  gap: clamp(16px, 2.4vw, 26px);
+}
+.manifest-aside .row{
+  display: grid;
+  gap: 8px;
+  padding: clamp(18px, 2.4vw, 26px) clamp(20px, 2.6vw, 30px);
+  border: 1px solid var(--rule);
+  border-top-color: var(--edge-lit);
+  border-radius: 14px;
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+}
+.manifest-aside .row .v{
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(16px, 1.6vw, 21px);
+  line-height: 1.28;
+  letter-spacing: 0.005em;
+}
+.manifest-aside .row.accent{ border-color: var(--rule-warm); }
+.manifest-aside .row.accent .v{ color: var(--matcha); }
+@media (min-width: 900px){
+  /* лесенка: 1-я плашка слева (под текстом), 2-я ниже и по центру,
+     3-я ещё ниже и справа. Больше воздуха между ступенями. */
+  .manifest-aside{ gap: clamp(28px, 4vw, 52px); }
+  .manifest-aside .row{ width: 56%; }
+  .manifest-aside .row:nth-child(1){ margin-left: 0; }
+  .manifest-aside .row:nth-child(2){ margin-left: 22%; }
+  .manifest-aside .row:nth-child(3){ margin-left: 44%; }
+}
+
+/* ============ lessons ============ */
+.lessons{ display: grid; gap: clamp(72px, 12vw, 160px); }
+.lesson{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 48px);
+  align-items: center;
+  position: relative;
+}
+/* мобильный порядок: сначала текст, потом иллюстрация */
+.lesson .l-body{ order: 1; }
+.lesson .l-img{ order: 2; }
+@media (min-width: 900px){
+  .lesson{
+    grid-template-columns: minmax(0, 6fr) minmax(0, 6fr);
+    gap: clamp(40px, 6vw, 96px);
+  }
+  /* на десктопе порядок восстанавливается слева-направо */
+  .lesson .l-img{ order: 1; }
+  .lesson .l-body{ order: 2; }
+  .lesson.flip .l-img{ order: 2; }
+  .lesson.flip .l-body{ order: 1; padding-left: clamp(0px, 5vw, 64px); }
+  .lesson:not(.flip):not(.iv) .l-body{ padding-right: clamp(0px, 5vw, 64px); }
+}
+.l-img{
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 220px;
+  /* пятно света матчи, в котором лежит образ — «источник света в кадре» */
+  background:
+    radial-gradient(58% 58% at 50% 48%, var(--matcha-soft), transparent 72%);
+}
+.l-img img{
+  max-height: clamp(280px, 56vw, 560px);
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+  /* screen: тёмные части образа растворяются в тьме, светлые — светятся.
+     Рассчитано на тёпло-тёмные иллюстрации бренда. */
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 24px 60px rgba(0,0,0,.5));
+}
+.l-num{
+  display: inline-flex; align-items: center; gap: 14px;
+  margin-bottom: clamp(14px, 2vw, 22px);
+  font-family: var(--mono);
+  font-size: var(--t-mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--muted);
+  font-weight: 500;
+}
+.l-num .ix{ color: var(--matcha); }
+.l-num::after{
+  content: ""; width: clamp(36px, 5vw, 72px); height: 1px; background: var(--matcha); opacity: .8;
+}
+.l-title{
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: var(--t-h2);
+  line-height: 1.18;
+  letter-spacing: 0.032em;
+  text-transform: uppercase;
+  margin: 0 0 clamp(20px, 3vw, 32px);
+  text-wrap: balance;
+  color: var(--ink);
+  text-shadow: 0 1px 30px var(--warm-halo);
+}
+.l-title em{ color: var(--matcha); font-weight: 500; }
+.l-lines{
+  display: grid;
+  gap: clamp(10px, 1.4vw, 14px);
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: clamp(16px, 1.4vw, 19px);
+  line-height: 1.5;
+}
+.l-lines .line{
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 14px;
+  align-items: baseline;
+}
+.l-lines .line::before{
+  content: "";
+  display: inline-block;
+  width: 10px; height: 1px;
+  background: var(--muted);
+  transform: translateY(-6px);
+}
+.l-lines .line.accent::before{ background: var(--matcha); height: 2px; }
+.l-lines .line.accent{
+  color: var(--ink);
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(16px, 1.5vw, 20px);
+  line-height: 1.3;
+  letter-spacing: -0.005em;
+}
+.l-lines .line.accent em{ color: var(--matcha); font-weight: 500; }
+
+/* lesson IV — концепт */
+.lesson.iv{
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(28px, 4vw, 48px);
+  padding-top: clamp(36px, 5vw, 60px);
+  border-top: 1px solid var(--rule);
+}
+.lesson.iv .l-body{ padding: 0; max-width: 760px; }
+
+/* ============ sprouts ============ */
+.sprouts{ display: grid; gap: 0; }
+.sprout{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(6px, 1.2vw, 14px);
+  padding: clamp(22px, 3.2vw, 36px) 0;
+  border-top: 1px solid var(--rule);
+}
+.sprout:last-child{ border-bottom: 1px solid var(--rule); }
+@media (min-width: 720px){
+  .sprout{
+    grid-template-columns: clamp(60px, 10%, 110px) minmax(0, 5fr) minmax(0, 7fr);
+    gap: clamp(20px, 3vw, 48px);
+    align-items: baseline;
+  }
+}
+.sprout .idx{
+  font-family: var(--mono); font-weight: 500; color: var(--matcha);
+  font-size: clamp(13px, 1vw, 14px);
+  letter-spacing: .12em; text-transform: uppercase;
+}
+.sprout .what{
+  font-family: var(--display); font-weight: 500;
+  font-size: clamp(20px, 2.3vw, 29px);
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+  color: var(--ink);
+}
+.sprout .vs{
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: clamp(15px, 1.2vw, 17.5px);
+  line-height: 1.62;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.sprouts-out{
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(20px, 2.3vw, 30px);
+  line-height: 1.34;
+  letter-spacing: -0.006em;
+  max-width: 820px;
+  margin-top: clamp(28px, 5vw, 48px);
+  text-wrap: pretty;
+  color: var(--ink);
+}
+.sprouts-out .acc{ color: var(--matcha); font-weight: 500; }
+
+/* ============ why ============ */
+.why{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(28px, 5vw, 56px);
+}
+@media (min-width: 900px){
+  .why{ grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+}
+/* три тега — без рамок, текстовый список с тонкими разделителями */
+.why-tags{
+  display: grid;
+  gap: 0;
+}
+.why-tags .t{
+  border-top: 1px solid var(--rule);
+  padding: clamp(18px, 2.4vw, 26px) 0;
+  display: flex; align-items: baseline; gap: 14px;
+  color: var(--ink);
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(18px, 1.9vw, 26px);
+  line-height: 1.22;
+  letter-spacing: 0.005em;
+}
+.why-tags .t:last-child{ border-bottom: 1px solid var(--rule); }
+.why-tags .t .dash{ color: var(--matcha); }
+.why-tags .t .em{ color: var(--matcha); }
+/* цитата — компактнее тегов, курсивом, спокойный текстовый голос */
+.why .quote{
+  position: relative;
+  padding: clamp(22px, 2.8vw, 32px) clamp(22px, 3vw, 36px);
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  border: 1px solid var(--rule);
+  border-left: 2px solid var(--rule-warm);
+  border-radius: 14px;
+  box-shadow: 0 28px 56px -36px rgba(0,0,0,.8);
+}
+.why .quote p{
+  font-family: var(--sans); font-weight: 300; font-style: italic;
+  font-size: clamp(14.5px, 1.25vw, 17px); line-height: 1.62;
+  margin: 0 0 1em;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.why .quote p strong{ color: var(--matcha); font-weight: 600; font-style: italic; }
+.why .quote .sig{
+  font-family: var(--mono);
+  font-size: var(--t-mono);
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--matcha);
+  margin-top: 16px;
+  font-style: normal;
+}
+
+/* ============ team ============ */
+.team{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(56px, 7vw, 80px);
+}
+@media (min-width: 900px){
+  .team{
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(28px, 4vw, 56px);
+  }
+}
+.person{
+  display: grid;
+  gap: 0;
+  min-width: 0;
+}
+.person .photo{
+  position: relative;
+  aspect-ratio: 4/5;
+  overflow: hidden;
+  border-radius: 6px;
+  /* тёплая подложка под фигуру: вырезанный портрет (PNG с прозрачным
+     фоном) не висит в пустоте, а выходит из мягкого тёплого свечения.
+     Силуэт по центру светлее, к краям уходит в тёплую тьму. */
+  background:
+    radial-gradient(72% 62% at 50% 36%,
+      rgba(58,50,38,.95) 0%,
+      rgba(38,33,25,.95) 46%,
+      var(--surface) 78%,
+      var(--bg-deep) 100%);
+  box-shadow: 0 30px 60px -34px rgba(0,0,0,.8);
+}
+.person .photo img{
+  width: 100%; height: 100%;
+  /* contain — фигура-вырезка видна целиком, не обрезается по голове.
+     Если фото с фоном (jpg) — поставьте классу .photo модификатор
+     .photo--filled, тогда object-fit станет cover (см. ниже). */
+  object-fit: contain;
+  object-position: bottom center;
+  /* тёплый дуотон ложится на саму фигуру; прозрачные зоны он не трогает */
+  filter: grayscale(1) sepia(.5) saturate(1.4) hue-rotate(-12deg)
+          brightness(.97) contrast(1.06);
+}
+/* вариант для фото С фоном (jpg/непрозрачный png): кадр заполняется */
+.person .photo.photo--filled img{
+  object-fit: cover;
+  object-position: center;
+}
+.person .photo.photo--filled{
+  background: var(--surface);
+}
+/* мягкое затемнение нижнего края — фигура «впадает» в карточку,
+   а не обрывается резкой линией */
+.person .photo::after{
+  content: "";
+  position: absolute; inset: 0;
+  background: linear-gradient(to bottom,
+    transparent 62%, rgba(12,10,6,.55) 100%);
+  pointer-events: none;
+}
+/* единый ритм у всех трёх карточек: одинаковые отступы фото→роль→имя→текст.
+   Роли дана min-height под две строки — имена стартуют на одной линии. */
+.person .role{
+  margin: clamp(16px, 2vw, 22px) 0 clamp(8px, 1.2vw, 12px);
+  min-height: 2.6em;
+  display: flex;
+  align-items: flex-start;
+}
+.person .name{
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(21px, 2.1vw, 29px);
+  line-height: 1.12;
+  letter-spacing: 0.005em;
+  margin: 0 0 clamp(12px, 1.6vw, 16px);
+  color: var(--ink);
+}
+.person .name .accent{ color: var(--matcha); }
+.person p{
+  font-family: var(--sans); font-weight: 300;
+  font-size: clamp(14.5px, 1.05vw, 16px);
+  line-height: 1.66;
+  color: var(--ink);
+  margin: 0;
+  text-wrap: pretty;
+}
+
+/* офсетный ритм портретов на десктопе */
+@media (min-width: 900px){
+  .person:nth-child(2){ transform: translateY(36px); }
+  .person:nth-child(3){ transform: translateY(72px); }
+  /* отметка-«рамка» вокруг ведущего — тёплый свет вокруг фигуры */
+  .person.featured .photo{ outline: 1px solid var(--matcha); outline-offset: 8px; }
+  .person.featured .photo::after{ background: linear-gradient(to bottom, transparent 66%, rgba(12,10,6,.5) 100%); }
+}
+
+/* ============ conditions ============ */
+.cond{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(24px, 4vw, 36px);
+}
+@media (min-width: 900px){
+  .cond{ grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 24px; align-items: start; }
+}
+.tier{
+  position: relative;
+  padding: clamp(28px, 3.4vw, 42px) clamp(22px, 3vw, 36px);
+  border: 1px solid var(--rule);
+  border-top-color: var(--edge-lit);  /* свет ложится на верхнюю грань — матча */
+  background: linear-gradient(180deg, var(--surface-2), var(--surface));
+  min-width: 0;
+  /* материальный минимализм: тарифы — единственные «предметы»,
+     поэтому им дано настоящее моделирование — свет сверху, тень снизу */
+  box-shadow:
+    0 32px 60px -34px rgba(0,0,0,.85),
+    inset 0 1px 0 rgba(199,216,154,.08);
+}
+.tier.early{
+  border-color: var(--matcha);
+  box-shadow:
+    0 32px 70px -32px rgba(0,0,0,.85),
+    0 0 60px -30px var(--matcha-glow),
+    inset 0 1px 0 rgba(199,216,154,.09);
+}
+@media (min-width: 900px){
+  .tier.early{ grid-column: 1 / span 6; transform: translateY(-10px); }
+  .tier.std  { grid-column: 7 / span 6; transform: translateY(28px); }
+}
+.tier .badge{
+  position: absolute; top: -10px; left: clamp(20px, 3vw, 36px);
+  background: var(--bg);
+  padding: 0 10px;
+}
+.tier .name{
+  font-family: var(--display); font-weight: 500;
+  font-size: clamp(18px, 1.7vw, 23px);
+  letter-spacing: -0.004em;
+  margin: 6px 0 18px;
+  color: var(--ink);
+}
+.tier .price{
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(36px, 5.8vw, 64px);
+  line-height: 1;
+  letter-spacing: -0.022em;
+  color: var(--ink);
+}
+.tier .price .cur{ font-size: .5em; color: var(--muted); padding-left: .1em; font-weight: 400; }
+.tier .note{
+  font-family: var(--sans); font-weight: 300; color: var(--muted);
+  font-size: var(--t-small);
+  line-height: 1.62;
+  margin-top: 16px;
+}
+.tier.early .price{ color: var(--matcha); text-shadow: 0 2px 30px var(--matcha-glow); }
+
+.format{
+  margin-top: clamp(48px, 8vw, 88px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0;
+}
+.format .row{
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 6px;
+  padding: clamp(18px, 2.4vw, 26px) 0;
+  border-top: 1px solid var(--rule);
+}
+.format .row:last-child{ border-bottom: 1px solid var(--rule); }
+@media (min-width: 640px){
+  .format .row{
+    grid-template-columns: minmax(160px, 26%) minmax(0, 1fr);
+    gap: clamp(20px, 3vw, 48px);
+    align-items: baseline;
+  }
+}
+.format .row .v{
+  font-family: var(--sans); font-weight: 400;
+  font-size: clamp(16px, 1.4vw, 19px);
+  line-height: 1.45;
+  color: var(--ink);
+}
+.format .row .v em{ color: var(--matcha); font-weight: 500; }
+
+/* строка статуса набора — после плашек, перед блоком анкеты */
+.cond-status{
+  margin: clamp(40px, 6vw, 72px) 0 clamp(36px, 6vw, 72px);
+  font-family: var(--display);
+  font-weight: 400;
+  font-size: clamp(19px, 2.3vw, 30px);
+  line-height: 1.3;
+  letter-spacing: 0.005em;
+  color: var(--matcha);
+  text-wrap: balance;
+}
+
+/* ============ CTA section — освещённая поляна ============ */
+/* Кульминация спуска: вся страница — тёплая тьма, а здесь тьма
+   расступается. Самое светлое место сайта — там, где зовут подойти. */
+.cta-sec{
+  position: relative;
+  text-align: left;
+  /* освещённая поляна — свет матчи: тьма расступается зелёным сиянием */
+  background:
+    radial-gradient(64% 90% at 50% 42%, var(--matcha-glow), transparent 70%),
+    radial-gradient(40% 60% at 50% 30%, var(--matcha-air-2), transparent 75%);
+  padding-top: clamp(96px, 15vw, 220px);
+  padding-bottom: clamp(96px, 14vw, 200px);
+  overflow: hidden;
+}
+/* тонкая линия-порог — матча: вход в освещённую поляну */
+.cta-sec::before{
+  content: "";
+  position: absolute;
+  top: 0; left: 50%;
+  width: 1px; height: clamp(44px, 8vw, 96px);
+  background: linear-gradient(rgba(199,216,154,0), var(--matcha), rgba(199,216,154,0));
+  opacity: .65;
+}
+@media (min-width: 720px){ .cta-sec{ text-align: center; } }
+.cta-h-h2{
+  font-family: var(--display); font-weight: 400;
+  font-size: clamp(27px, 4.6vw, 58px);
+  line-height: 1.18;
+  letter-spacing: 0.028em;
+  text-transform: uppercase;
+  margin: 0 auto clamp(18px, 3vw, 28px);
+  max-width: 24ch;
+  text-wrap: balance;
+  color: var(--ink);
+  text-shadow: 0 2px 50px rgba(199,216,154,.20);
+}
+/* точка жизни — матча: живое слово в самом светлом месте */
+.cta-h-h2 em{ color: var(--matcha); font-weight: 500; }
+.cta-sub{
+  font-family: var(--sans); font-weight: 300;
+  font-size: clamp(16px, 1.45vw, 21px); line-height: 1.6;
+  margin: 0 auto clamp(32px, 5vw, 48px);
+  max-width: 52ch;
+  color: var(--muted);
+  text-wrap: pretty;
+}
+.cta-inline{
+  display: inline-flex; align-items: center; gap: 14px;
+  font-family: var(--display); font-weight: 600;
+  font-size: clamp(16px, 1.6vw, 21px);
+  letter-spacing: -0.004em;
+  color: var(--dark);
+  background: var(--matcha);
+  text-decoration: none;
+  padding: 17px 32px;
+  border-radius: 999px;
+  border: 1px solid var(--matcha);
+  min-height: 52px;
+  cursor: pointer;
+  transition: background .25s ease, transform .25s ease, gap .25s ease, box-shadow .25s ease;
+  box-shadow: 0 20px 50px -16px var(--matcha-glow), 0 0 0 8px rgba(199,216,154,.09);
+}
+.cta-inline .arr{ transition: transform .25s ease; display: inline-block; }
+.cta-inline:hover{ gap: 20px; background: #d4e0b6; border-color: #d4e0b6; }
+.cta-inline:hover .arr{ transform: translateX(4px); }
+.cta-after{
+  margin-top: 24px;
+  color: var(--muted);
+}
+
+/* ============ disclaimer + footer ============ */
+.disclaimer{
+  padding: clamp(40px, 5vw, 60px) 0 clamp(20px, 3vw, 28px);
+  border-top: 1px solid var(--rule);
+}
+.disclaimer p{
+  font-family: var(--sans); font-weight: 300;
+  font-size: clamp(11px, .82vw, 12px);
+  line-height: 1.7;
+  color: var(--muted);
+  max-width: none;
+  margin: 0;
+}
+.foot{
+  padding: clamp(20px, 3vw, 40px) 0 clamp(36px, 6vw, 64px);
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(28px, 3vw, 40px);
+}
+@media (min-width: 640px){
+  .foot{ grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: clamp(32px, 5vw, 80px); }
+}
+.foot .col{ font-size: var(--t-small); line-height: 1.7; color: var(--ink); min-width: 0; }
+.foot .col .mono{ display:block; margin-bottom: 10px; }
+.foot .col p{ margin: 0 0 .35em; }
+.foot a{
+  color: var(--ink);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 1px;
+  transition: border-color .2s ease, color .2s ease;
+  word-break: break-word;
+}
+.foot a:hover{ color: var(--matcha); border-color: var(--matcha); }
+.foot-bottom{
+  border-top: 1px solid var(--rule);
+  padding: 18px 0 8px;
+  display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+  font-family: var(--mono); font-size: var(--t-mono); color: var(--muted);
+  letter-spacing: .14em; text-transform: uppercase;
+}
+
+/* ============ FIXED CTA ============ */
+.fixed-cta{
+  position: fixed;
+  z-index: 50;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  pointer-events: none; /* контейнер не перехватывает клики */
+}
+.fixed-cta .btn{ pointer-events: auto; }
+.fixed-cta .btn{
+  display: inline-flex; align-items: center; justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 0 22px;
+  font-family: var(--display);
+  font-size: clamp(13px, 1.05vw, 14.5px);
+  font-weight: 600;
+  letter-spacing: -0.004em;
+  text-decoration: none;
+  border-radius: 999px;
+  white-space: nowrap;
+  box-shadow: 0 14px 36px -10px rgba(0,0,0,.7), 0 4px 14px -6px rgba(0,0,0,.5);
+  transition: transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease, border-color .2s ease;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.fixed-cta .btn .arr{ transition: transform .25s ease; }
+.fixed-cta .btn:hover{ transform: translateY(-1px); box-shadow: 0 18px 42px -12px rgba(0,0,0,.75), 0 6px 16px -6px rgba(0,0,0,.55); }
+.fixed-cta .btn.primary{
+  background: var(--matcha);
+  color: var(--dark);
+  border: 1px solid var(--matcha);
+  box-shadow: 0 14px 36px -12px var(--matcha-glow), 0 4px 14px -6px rgba(0,0,0,.5);
+}
+.fixed-cta .btn.primary:hover{ background: #d4e0b6; border-color: #d4e0b6; }
+.fixed-cta .btn.primary:hover .arr{ transform: translateX(3px); }
+.fixed-cta .btn.secondary{
+  background: var(--surface-2);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+}
+.fixed-cta .btn.secondary:hover{ color: var(--matcha); border-color: var(--rule-warm); }
+.fixed-cta .btn.secondary .tg{
+  display: inline-block; width: 14px; height: 14px;
+  color: var(--matcha);
+}
+/* по умолчанию (десктоп + планшет ≥521px) показываем длинную надпись, прячем короткую */
+.fixed-cta .btn .label-short{ display: none; }
+.fixed-cta .btn .label-long{ display: inline; }
+
+/* средний планшет — у secondary прячем длинную, показываем короткую,
+   primary остаётся «Заполнить анкету» */
+@media (max-width: 720px){
+  .fixed-cta .btn.secondary .label-long{ display: none; }
+  .fixed-cta .btn.secondary .label-short{ display: inline; }
+}
+
+/* мобила: компактнее, ширина под контент, обе в один ряд внизу */
+@media (max-width: 520px){
+  .fixed-cta{
+    left: max(12px, env(safe-area-inset-left));
+    right: max(12px, env(safe-area-inset-right));
+    bottom: calc(10px + env(safe-area-inset-bottom));
+    justify-content: space-between;
+    gap: 8px;
+  }
+  .fixed-cta .btn{
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 12px;
+    font-size: 13px;
+    min-height: 48px;
+  }
+  .fixed-cta .btn .arr{ display: none; }
+}
+
+/* грейн / тонкая теплая подложка убрана — фон строго белый */
+
+/* very-narrow tweaks */
+@media (max-width: 360px){
+  :root{ --pad-x: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ============ TOP BAR ============ -->
+<header class="topbar">
+  <div class="wrap row">
+    <div class="brand">Скрижали<span class="dot"></span><span class="sub">Адаптивности</span></div>
+    <div class="status mono">
+      <span class="long">Анкета открыта · </span>предзапись <span class="ochre">2026</span>
+    </div>
+  </div>
+</header>
+
+<!-- ============ HERO ============ -->
+<section class="hero" style="padding-top:0;">
+  <div class="wrap">
+
+    <!-- огромный заголовок во всю ширину блока -->
+    <h1 class="hero-title">
+      <span class="l1">Скрижали</span>
+      <span class="l2">Адаптивности</span>
+    </h1>
+
+    <!-- нижняя строка героя: слева статус, справа три плашки-факта -->
+    <div class="hero-foot">
+      <!--
+        EDITABLE: блок «старт / статус».
+        Текст ниже меняется от сайта к сайту (ранняя оплата / оплата).
+        Правьте только содержимое .hero-status-text.
+      -->
+      <div class="hero-status" data-editable="status">
+        <div class="mono label">Статус</div>
+        <div class="hero-status-text">
+          Программа стартует ориентировочно через месяц, когда&nbsp;наберётся
+          <span class="acc">20&nbsp;человек</span>.
+        </div>
+      </div>
+
+      <div class="chips chips-facts">
+        <div class="fact">
+          <div class="fact-n">4</div>
+          <div class="fact-l mono">недели</div>
+        </div>
+        <div class="fact">
+          <div class="fact-n">3</div>
+          <div class="fact-l mono">метафоры</div>
+        </div>
+        <div class="fact">
+          <div class="fact-n">20–40</div>
+          <div class="fact-l mono">человек</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ VIDEO ============ -->
+<section id="intro-video">
+  <div class="wrap">
+    <div class="video-frame">
+      <video
+        src="assets/skrizhali.mp4"
+        poster="assets/skrizhali-poster.jpg"
+        controls
+        preload="metadata"
+        playsinline>
+      </video>
+    </div>
+  </div>
+</section>
+
+<!-- ============ MANIFEST / INTRO ============ -->
+<section id="manifest">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">
+        <span class="n">I</span>
+        <span class="mono">Контур</span>
+      </div>
+      <h2 class="sec-h">Мир усложняется быстрее, чем&nbsp;инструкции успевают <em>обновляться</em>.</h2>
+    </div>
+
+    <p class="manifest-intro">
+      В такой реальности выигрывает не&nbsp;тот, кто знает больше или работает быстрее&nbsp;— а&nbsp;тот, кто переваривает неопределённость и&nbsp;смотрит в&nbsp;реальность с&nbsp;открытыми&nbsp;глазами.
+    </p>
+
+    <div class="manifest">
+      <p class="lead">
+        Перед каждым встаёт выбор: приспосабливаться к&nbsp;изменчивому миру, с&nbsp;каждым шагом теряя себя, — или возводить несокрушимую башню из&nbsp;убеждений и&nbsp;прятаться в&nbsp;ней.
+      </p>
+
+      <aside class="manifest-aside">
+        <div class="row">
+          <div class="mono">Башня</div>
+          <div class="v">ломается под собственным весом</div>
+        </div>
+        <div class="row">
+          <div class="mono">Приспособление</div>
+          <div class="v">растворяет того, кто&nbsp;приспосабливается</div>
+        </div>
+        <div class="row accent">
+          <div class="mono ochre">Третий способ</div>
+          <div class="v">находить силу не вопреки изменчивости, а&nbsp;благодаря&nbsp;ей</div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHAT'S INSIDE / LESSONS ============ -->
+<section id="inside">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">
+        <span class="n">II</span>
+        <span class="mono">Что внутри</span>
+      </div>
+      <h2 class="sec-h">Четыре занятия. Три метафоры. Одна <em>фигура</em>.</h2>
+    </div>
+
+    <p class="sprouts-intro" style="max-width: 60ch;">
+      В каждом из первых трёх занятий — одна метафора как плотная пустота: структура, в которой каждый кристаллизует собственный опыт. Метафоры самодостаточны и не выстроены в обязательную последовательность — они усиливают друг&nbsp;друга.
+    </p>
+
+    <div class="lessons">
+
+      <!-- ====== LESSON I — WATER ====== -->
+      <article class="lesson">
+        <div class="l-img">
+          <img src="assets/water.png" alt="Вода — метафора потока" loading="lazy" />
+        </div>
+        <div class="l-body">
+          <div class="l-num"><span class="ix">I</span> Занятие&nbsp;первое</div>
+          <h3 class="l-title">Принятие потока</h3>
+          <div class="l-lines">
+            <div class="line">Скала держится — стирается.</div>
+            <div class="line">Вода уступает — проходит.</div>
+            <div class="line accent"><em>Не река несёт тебя — ты несёшь себя в&nbsp;реке.</em></div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ====== LESSON II — LOTUS ====== -->
+      <article class="lesson flip">
+        <div class="l-img">
+          <img src="assets/lotus.png" alt="Лотос — ритм покоя и действия" loading="lazy" />
+        </div>
+        <div class="l-body">
+          <div class="l-num"><span class="ix">II</span> Занятие&nbsp;второе</div>
+          <h3 class="l-title">Ритм покоя и&nbsp;действия</h3>
+          <div class="l-lines">
+            <div class="line">Вечное движение — пустыня.</div>
+            <div class="line">Вечный покой — лёд.</div>
+            <div class="line accent"><em>Покой не остановка, а накопление: глубина тишины рождает высоту&nbsp;полёта.</em></div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ====== LESSON III — FIRE ====== -->
+      <article class="lesson">
+        <div class="l-img">
+          <img src="assets/fire.png" alt="Огонь — живое пламя" loading="lazy" />
+        </div>
+        <div class="l-body">
+          <div class="l-num"><span class="ix">III</span> Занятие&nbsp;третье</div>
+          <h3 class="l-title">Живой огонь</h3>
+          <div class="l-lines">
+            <div class="line">Ровное пламя в&nbsp;урагане — пепел.</div>
+            <div class="line">Спрятанный огонь — удушье.</div>
+            <div class="line accent"><em>Истинный огонь танцует с&nbsp;ветром: преграда становится&nbsp;топливом.</em></div>
+          </div>
+        </div>
+      </article>
+
+      <!-- ====== LESSON IV — CONCEPT ====== -->
+      <article class="lesson iv">
+        <div class="l-body">
+          <div class="l-num"><span class="ix">IV</span> Занятие&nbsp;четвёртое · концептуализация</div>
+          <h3 class="l-title">Три метафоры собираются в&nbsp;одну <em>фигуру</em>.</h3>
+
+          <div class="l-lines" style="max-width: 64ch;">
+            <div class="line">Формат — концентрическая метафора, тройки, опыление&nbsp;3×3.</div>
+            <div class="line">Задача — не понять, а различить и&nbsp;напитаться опытом друг&nbsp;друга.</div>
+            <div class="line accent"><em>Занятие — раствор, метафора — структура, личный&nbsp;опыт — наполнение.</em></div>
+          </div>
+        </div>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+<!-- ============ WHAT SPROUTS ============ -->
+<section id="sprouts">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">
+        <span class="n">III</span>
+        <span class="mono">Что прорастает</span>
+      </div>
+      <h2 class="sec-h">Не «станет легче», а&nbsp;появится <em>способность</em> переваривать давление в&nbsp;действие.</h2>
+    </div>
+
+    <p class="sprouts-intro">
+      Не «появятся знания». Появится новое различение по&nbsp;трём осям одновременно — не как инструменты в&nbsp;перегруженной системе, а&nbsp;как сдвиг геометрии того, как человек думает и&nbsp;действует под нагрузкой.
+    </p>
+
+    <div class="sprouts">
+      <div class="sprout">
+        <div class="idx">— I</div>
+        <div class="what">Нести себя в&nbsp;потоке.</div>
+        <div class="vs">А не бороться с&nbsp;течением или плыть безвольно.</div>
+      </div>
+      <div class="sprout">
+        <div class="idx">— II</div>
+        <div class="what">Копить в&nbsp;покое силу для действия.</div>
+        <div class="vs">А не выгорать в&nbsp;вечном движении или застывать в&nbsp;покое.</div>
+      </div>
+      <div class="sprout">
+        <div class="idx">— III</div>
+        <div class="what">Превращать преграду в&nbsp;топливо.</div>
+        <div class="vs">А не гаснуть под ветром или прятать огонь.</div>
+      </div>
+    </div>
+
+    <p class="sprouts-out">
+      После этого привычная плотность мира перестаёт быть тем, что&nbsp;ломает, и&nbsp;становится тем, что&nbsp;<span class="acc">несёт</span>.
+    </p>
+  </div>
+</section>
+
+<!-- ============ WHY THIS FORMAT ============ -->
+<section id="why">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">
+        <span class="n">IV</span>
+        <span class="mono">Почему именно так</span>
+      </div>
+      <h2 class="sec-h">Не <em>информация</em> и&nbsp;не запись.</h2>
+    </div>
+
+    <div class="why">
+      <div class="why-tags">
+        <div class="t"><span class="dash">—</span> Различение, а&nbsp;не информация</div>
+        <div class="t"><span class="dash">—</span> Группа, а&nbsp;не запись</div>
+        <div class="t"><span class="dash">—</span> Плотная пустота метафоры, а&nbsp;не учебник</div>
+      </div>
+      <div class="quote">
+        <p>«Перебрав за&nbsp;годы работы множество форматов и&nbsp;материалов, я не вижу сейчас ничего более методологически продуманного для&nbsp;проживания адаптивности, чем&nbsp;эти&nbsp;метафоры.</p>
+        <p>Каждая держит внутри живое натяжение — не «правильно против неправильного», а&nbsp;компас, по&nbsp;которому различимо третье. Именно это делает их рабочими в&nbsp;группе: участнику есть что&nbsp;<strong>различать</strong>, а не с&nbsp;чем&nbsp;согласиться.»</p>
+        <div class="sig">— Эд</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ TEAM ============ -->
+<section id="team">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">
+        <span class="n">V</span>
+        <span class="mono">Команда</span>
+      </div>
+      <h2 class="sec-h">Три <em>человека</em>.</h2>
+    </div>
+
+    <div class="team">
+      <article class="person">
+        <div class="photo"><img src="assets/plaksin.png" alt="Максим Плаксин" loading="lazy" /></div>
+        <div class="role mono">Автор метафор</div>
+        <h3 class="name">Максим <span class="accent">Плаксин</span></h3>
+        <p>
+          Основатель giper.fm — работа с&nbsp;мировыми брендами в&nbsp;e-commerce, выручка группы в&nbsp;2025 году 37,6 млрд&nbsp;₽. Метафоры разработаны как внутренний язык для&nbsp;партнёров и&nbsp;топ-менеджеров компании — чтобы описать, почему организация в&nbsp;самые турбулентные годы только набирает обороты. Группа ведётся с&nbsp;его согласия.
+        </p>
+      </article>
+
+      <article class="person featured">
+        <div class="photo"><img src="assets/ed.png" alt="Эд" loading="lazy" /></div>
+        <div class="role mono ochre">Ведущий и&nbsp;архитектор среды</div>
+        <h3 class="name"><span class="accent">Эд</span></h3>
+        <p>
+          7&nbsp;лет медицинского образования, несколько лет курпатовской методологии несодержательного мышления и&nbsp;теории ограничений Голдратта. Более 1400&nbsp;часов разборов один на&nbsp;один. Три потока групповой программы «Бернерс», доходимость около&nbsp;90%. Архитектор среды: на&nbsp;прямой вопрос — встречный вопрос или переадресация группе.
+        </p>
+      </article>
+
+      <article class="person">
+        <div class="photo"><img src="assets/balaeva.png" alt="Настя Балаева" loading="lazy" /></div>
+        <div class="role mono">Со-архитектор среды</div>
+        <h3 class="name">Настя <span class="accent">Балаева</span></h3>
+        <p>
+          EX-Лаборатория нейронаук и&nbsp;поведения человека Сбера. 6&nbsp;лет курпатовской методологии несодержательного мышления. Автор курса по&nbsp;нейромаркетингу для&nbsp;магистратуры МФТИ и&nbsp;Сбера. 2&nbsp;года кейсов внедрения и&nbsp;монетизации ИИ в&nbsp;бизнесе — от&nbsp;кинокомпании до&nbsp;пищевого производства. Участвует в&nbsp;проработке архитектуры.
+        </p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- ============ CONDITIONS ============ -->
+<!--
+  EDITABLE: блок «условия» (тарифы + формат + статус набора).
+  Для сайтов-дублей здесь меняются цены, тексты тарифов и строка статуса.
+  Правьте только содержимое внутри #conditions.
+-->
+<section id="conditions" data-editable="conditions">
+  <div class="wrap">
+    <div class="sec-head">
+      <div class="sec-num">
+        <span class="n">VI</span>
+        <span class="mono">Условия</span>
+      </div>
+      <h2 class="sec-h">Два тарифа. Один <em>формат</em>.</h2>
+    </div>
+
+    <div class="cond">
+      <div class="tier early">
+        <span class="badge mono ochre">Раннее бронирование</span>
+        <div class="name">Для первых десяти</div>
+        <div class="price">19&nbsp;000<span class="cur">&nbsp;₽</span></div>
+        <p class="note">Цена для первых десяти, оплативших участие после анкеты предзаписи.</p>
+      </div>
+      <div class="tier std">
+        <span class="badge mono">Стандартный</span>
+        <div class="name">Полная стоимость</div>
+        <div class="price">25&nbsp;000<span class="cur">&nbsp;₽</span></div>
+        <p class="note">Базовая цена участия в&nbsp;группе.</p>
+      </div>
+    </div>
+
+    <div class="format">
+      <div class="row">
+        <div class="mono">Формат</div>
+        <div class="v"><em>4&nbsp;занятия</em> по&nbsp;4&nbsp;часа онлайн, одно в&nbsp;неделю.</div>
+      </div>
+      <div class="row">
+        <div class="mono">Время</div>
+        <div class="v">Субботы, <em>12:00</em> по&nbsp;Москве.</div>
+      </div>
+      <div class="row">
+        <div class="mono">Даты занятий</div>
+        <div class="v">Будут обновляться по&nbsp;мере заполнения анкет.</div>
+      </div>
+      <div class="row">
+        <div class="mono">Часовые пояса</div>
+        <div class="v">Европа — позднее утро. СНГ и&nbsp;Ближний Восток — день. Юго-Восточная Азия — вечер.</div>
+      </div>
+      <div class="row">
+        <div class="mono">Сопровождение</div>
+        <div class="v">
+          Закрытый Telegram-канал с&nbsp;материалами и&nbsp;вещанием ведущего. Отдельно — чат под&nbsp;постами для&nbsp;общения участников.
+          Доступ к&nbsp;закрытому каналу сохраняется в&nbsp;течение <em>3&nbsp;месяцев</em> после окончания программы.
+        </div>
+      </div>
+    </div>
+
+    <p class="cond-status">Набор открыт. Закроется, когда группа будет&nbsp;собрана.</p>
+  </div>
+</section>
+
+<!-- ============ CTA ============ -->
+<!--
+  EDITABLE: блок «анкета».
+  Для сайтов-дублей здесь меняются ссылка href и, при необходимости, тексты.
+  Правьте только содержимое внутри #cta.
+-->
+<section id="cta" class="cta-sec" data-editable="cta">
+  <div class="wrap">
+    <h2 class="cta-h-h2">Анкета — не&nbsp;заявка, а&nbsp;<em>разговор</em>.</h2>
+    <p class="cta-sub">
+      То, что напишется, становится частью того, что&nbsp;мы приносим в&nbsp;работу. Заполнение — около 10–15 минут.
+    </p>
+    <a class="cta-inline" href="https://forms.yandex.ru/cloud/6a0aee5695add5a0eb419c14/" target="_blank" rel="noopener">
+      Заполнить анкету
+      <span class="arr" aria-hidden="true">→</span>
+    </a>
+    <div class="cta-after mono">анкета открыта всегда · связь в&nbsp;течение нескольких дней</div>
+  </div>
+</section>
+
+<!-- ============ DISCLAIMER ============ -->
+<div class="wrap">
+  <div class="disclaimer">
+    <p>
+      Программа предназначена для&nbsp;совершеннолетних дееспособных лиц (18+). Это образовательный продукт: он не является медицинской, психотерапевтической, психологической или диагностической услугой и&nbsp;не заменяет их. Программа не гарантирует конкретного результата. Сессии записываются, запись является частью программы. Данные защищены.
+    </p>
+  </div>
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  <div class="wrap">
+    <div class="foot">
+      <div class="col">
+        <span class="mono">Реквизиты</span>
+        <p>ИП Рудометкин Эдуард Юрьевич</p>
+        <p>ИНН&nbsp;<span class="tnum">262706374044</span></p>
+        <p>ОГРНИП&nbsp;<span class="tnum">320784700269194</span></p>
+        <p>Санкт-Петербург</p>
+        <p style="margin-top:.6em;"><a href="mailto:ed@ed-team.ru">ed@ed-team.ru</a></p>
+      </div>
+      <div class="col">
+        <span class="mono">Документы</span>
+        <p><a href="https://disk.yandex.ru/i/OEI8YJJVM3b11w" target="_blank" rel="noopener">Публичная оферта</a></p>
+        <p><a href="https://disk.yandex.ru/i/wwU4utxwK9_wwQ" target="_blank" rel="noopener">Политика обработки персональных данных</a></p>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>Скрижали · Адаптивности</span>
+      <span>предзапись · 2026</span>
+    </div>
+  </div>
+</footer>
+
+<!-- ============ FIXED CTA STACK ============ -->
+<div class="fixed-cta" aria-label="Действия">
+  <a class="btn secondary"
+     href="https://t.me/nastyabalaeva"
+     target="_blank"
+     rel="noopener">
+    <svg class="tg" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M21.7 3.3 2.9 10.6c-1.2.5-1.2 1.2-.2 1.5l4.7 1.5 1.8 5.6c.2.7.6.8 1.2.3l2.7-2.4 4.7 3.5c.9.5 1.5.2 1.7-.8L22.9 4.6c.3-1.2-.4-1.8-1.2-1.3zM9.3 14.7l-.4 4 1.8-2.5 4.6-4.1c.3-.3-.1-.4-.5-.2L9.3 14.7z"/>
+    </svg>
+    <span class="label-short">Вопросы?</span>
+    <span class="label-long">Остались вопросы?</span>
+  </a>
+  <a class="btn primary"
+     href="https://forms.yandex.ru/cloud/6a0aee5695add5a0eb419c14/"
+     target="_blank"
+     rel="noopener">
+    <span>Заполнить анкету</span>
+    <span class="arr" aria-hidden="true">→</span>
+  </a>
+</div>
+
+</body>
+</html>
