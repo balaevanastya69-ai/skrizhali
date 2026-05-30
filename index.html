@@ -473,7 +473,7 @@ section{ position: relative; padding-top: var(--gap-sec); padding-bottom: 0; }
   .lesson .l-body{ order: 2; }
   .lesson.flip .l-img{ order: 2; }
   .lesson.flip .l-body{ order: 1; padding-left: clamp(0px, 5vw, 64px); }
-  .lesson:not(.flip):not(.iv) .l-body{ padding-right: clamp(0px, 5vw, 64px); }
+  .lesson:not(.flip) .l-body{ padding-right: clamp(0px, 5vw, 64px); }
 }
 .l-img{
   position: relative;
@@ -553,15 +553,6 @@ section{ position: relative; padding-top: var(--gap-sec); padding-bottom: 0; }
   letter-spacing: -0.005em;
 }
 .l-lines .line.accent em{ color: var(--matcha); font-weight: 500; }
-
-/* lesson IV — концепт */
-.lesson.iv{
-  grid-template-columns: minmax(0, 1fr);
-  gap: clamp(28px, 4vw, 48px);
-  padding-top: clamp(36px, 5vw, 60px);
-  border-top: 1px solid var(--rule);
-}
-.lesson.iv .l-body{ padding: 0; max-width: 760px; }
 
 /* ============ sprouts ============ */
 .sprouts{ display: grid; gap: 0; }
@@ -1168,7 +1159,7 @@ section{ position: relative; padding-top: var(--gap-sec); padding-bottom: 0; }
         <span class="n">II</span>
         <span class="mono">Что внутри</span>
       </div>
-      <h2 class="sec-h">Первый месяц. Три метафоры. Одна <em>фигура</em>.</h2>
+      <h2 class="sec-h">Первые три <em>метафоры</em>.</h2>
     </div>
 
     <p class="sprouts-intro" style="max-width: 60ch;">
@@ -1221,20 +1212,6 @@ section{ position: relative; padding-top: var(--gap-sec); padding-bottom: 0; }
             <div class="line">Ровное пламя в&nbsp;урагане — пепел.</div>
             <div class="line">Спрятанный огонь — удушье.</div>
             <div class="line accent"><em>Истинный огонь танцует с&nbsp;ветром: преграда становится&nbsp;топливом.</em></div>
-          </div>
-        </div>
-      </article>
-
-      <!-- ====== LESSON IV — CONCEPT ====== -->
-      <article class="lesson iv">
-        <div class="l-body">
-          <div class="l-num"><span class="ix">IV</span> Занятие&nbsp;четвёртое · концептуализация</div>
-          <h3 class="l-title">Три метафоры собираются в&nbsp;одну <em>фигуру</em>.</h3>
-
-          <div class="l-lines" style="max-width: 64ch;">
-            <div class="line">Формат — концентрическая метафора, тройки, опыление&nbsp;3×3.</div>
-            <div class="line">Задача — не понять, а различить и&nbsp;напитаться опытом друг&nbsp;друга.</div>
-            <div class="line accent"><em>Занятие — раствор, метафора — структура, личный&nbsp;опыт — наполнение.</em></div>
           </div>
         </div>
       </article>
