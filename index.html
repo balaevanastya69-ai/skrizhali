@@ -1064,6 +1064,93 @@ section{ position: relative; padding-top: var(--gap-sec); padding-bottom: 0; }
 @media (max-width: 360px){
   :root{ --pad-x: 16px; }
 }
+
+/* ============ cookie consent ============
+   Баннер согласия. Появляется ДО любых обращений к Яндекс.Метрике.
+   Поднят над фиксированной CTA-панелью (она bottom-right, z-index:50),
+   поэтому они не пересекаются ни на одной ширине. */
+.cookie-consent{
+  position: fixed;
+  z-index: 60;
+  left: 50%;
+  bottom: calc(16px + var(--cta-h) + 16px + env(safe-area-inset-bottom));
+  width: min(600px, calc(100vw - 28px));
+  background: var(--surface);
+  border: 1px solid var(--rule-warm);
+  border-radius: 16px;
+  padding: 20px 22px;
+  box-shadow: 0 26px 64px -18px rgba(0,0,0,.82), 0 8px 22px -8px rgba(0,0,0,.6);
+  font-family: var(--sans);
+  color: var(--ink);
+  opacity: 0;
+  transform: translateX(-50%) translateY(14px);
+  transition: opacity .35s ease, transform .35s ease;
+  pointer-events: none;
+}
+.cookie-consent.is-visible{
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+  pointer-events: auto;
+}
+@media (prefers-reduced-motion: reduce){
+  .cookie-consent{ transition: none; transform: translateX(-50%); }
+  .cookie-consent.is-visible{ transform: translateX(-50%); }
+}
+.cookie-consent__title{
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(16px, 1.4vw, 18px);
+  letter-spacing: -0.004em;
+  color: var(--ink);
+  margin: 0 0 8px;
+}
+.cookie-consent__text{
+  font-size: var(--t-small);
+  line-height: 1.55;
+  color: var(--muted);
+  margin: 0 0 16px;
+}
+.cookie-consent__text a{
+  color: var(--matcha);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.cookie-consent__actions{ display: flex; gap: 10px; }
+.cookie-consent__btn{
+  flex: 1 1 0;
+  min-height: 44px;
+  padding: 0 18px;
+  border-radius: 999px;
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: 13.5px;
+  letter-spacing: -0.004em;
+  white-space: nowrap;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background .2s ease, color .2s ease, border-color .2s ease, transform .2s ease;
+}
+.cookie-consent__btn:hover{ transform: translateY(-1px); }
+.cookie-consent__btn.accept{
+  background: var(--matcha);
+  color: var(--dark);
+  border: 1px solid var(--matcha);
+}
+.cookie-consent__btn.accept:hover{ background: #d4e0b6; border-color: #d4e0b6; }
+.cookie-consent__btn.decline{
+  background: var(--surface-2);
+  color: var(--ink);
+  border: 1px solid var(--rule);
+}
+.cookie-consent__btn.decline:hover{ color: var(--matcha); border-color: var(--rule-warm); }
+
+/* мобила: банер во всю ширину, всё так же над CTA-рядом */
+@media (max-width: 520px){
+  .cookie-consent{
+    width: calc(100vw - 24px);
+    padding: 18px 18px;
+  }
+}
 </style>
 </head>
 <body>
@@ -1451,6 +1538,93 @@ section{ position: relative; padding-top: var(--gap-sec); padding-bottom: 0; }
     <span class="arr" aria-hidden="true">→</span>
   </a>
 </div>
+
+<!-- ============ COOKIE CONSENT ============ -->
+<aside id="cookieConsent" class="cookie-consent" role="region"
+       aria-label="Уведомление об использовании файлов cookie" hidden>
+  <p class="cookie-consent__title">Мы используем файлы cookie</p>
+  <p class="cookie-consent__text">
+    Так сайт работает стабильнее и&nbsp;удобнее, а&nbsp;мы понимаем, что улучшить.
+    Нажимая «Хорошо», вы&nbsp;соглашаетесь с&nbsp;их использованием.
+    <a href="https://disk.yandex.ru/i/wwU4utxwK9_wwQ" target="_blank" rel="noopener">Подробнее</a>.
+  </p>
+  <div class="cookie-consent__actions">
+    <button type="button" class="cookie-consent__btn accept">Хорошо</button>
+  </div>
+</aside>
+
+<!-- ============ COOKIE-УВЕДОМЛЕНИЕ + ЯНДЕКС.МЕТРИКА ============ -->
+<script>
+(function(){
+  /* ⬇️⬇️⬇️  ВСТАВЬ СЮДА НОМЕР СЧЁТЧИКА ИЗ metrika.yandex.ru (только цифры)  ⬇️⬇️⬇️ */
+  var YM_COUNTER_ID = 109622474;
+  /* ⬆️⬆️⬆️  напр. 98765432 — это единственное, что обязательно поменять  ⬆️⬆️⬆️ */
+
+  /* Режим подключения Метрики. ВАЖНО: держите false.
+     Политика обработки ПДн (ред. 22.05.2026, п. 13.3) прямо заявляет, что до
+     согласия скрипты веб-аналитики НЕ загружаются. Значение false соответствует
+     этому; true сделает поведение сайта противоречащим вашей же политике.
+     false — Метрика стартует ПОСЛЕ нажатия «Хорошо» (один тап, но до согласия
+             ничего не грузится). Это и есть требуемый режим.
+     true  — Метрика грузится сразу при загрузке. НЕ использовать без переписывания
+             п. 13.3 политики. */
+  var LOAD_BEFORE_CONSENT = false;
+
+  var STORAGE_KEY = 'consent.skrizhali.cookie'; // значение: 'ok' (баннер закрыт)
+  var banner = null;
+
+  // Стандартный код Метрики. Идемпотентен: повторный вызов ничего не дублирует.
+  function loadMetrica(){
+    if (window.__ymLoaded) return;
+    window.__ymLoaded = true;
+    (function(m,e,t,r,i,k,a){
+      m[i]=m[i]||function(){(m[i].a=m[i].a||[]).push(arguments)};
+      m[i].l=1*new Date();
+      for (var j=0;j<e.scripts.length;j++){ if(e.scripts[j].src===r){return;} }
+      k=e.createElement(t),a=e.getElementsByTagName(t)[0],k.async=1,k.src=r,a.parentNode.insertBefore(k,a)
+    })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js', 'ym');
+
+    ym(YM_COUNTER_ID, 'init', {
+      clickmap: true,
+      trackLinks: true,
+      accurateTrackBounce: true,
+      webvisor: false   // Вебвизор записывает действия посетителя. Включай (true) только если это
+                        // описано в политике конфиденциальности — иначе оставь false.
+    });
+  }
+
+  function seen(){ try { return localStorage.getItem(STORAGE_KEY) === 'ok'; } catch(e){ return false; } }
+  function remember(){ try { localStorage.setItem(STORAGE_KEY, 'ok'); } catch(e){} }
+
+  function hideBanner(){
+    if (!banner) return;
+    banner.classList.remove('is-visible');
+    setTimeout(function(){ if (banner && banner.parentNode) banner.parentNode.removeChild(banner); }, 420);
+  }
+
+  function showBanner(){
+    banner = document.getElementById('cookieConsent');
+    if (!banner) return;
+    banner.hidden = false;
+    requestAnimationFrame(function(){ banner.classList.add('is-visible'); });
+    banner.querySelector('.accept').addEventListener('click', function(){
+      remember(); hideBanner(); loadMetrica(); // loadMetrica идемпотентен
+    });
+  }
+
+  function init(){
+    var already = seen();
+    if (LOAD_BEFORE_CONSENT) loadMetrica();        // режим «уже включено»: грузим сразу
+    else if (already){ loadMetrica(); return; }    // режим «после согласия»: согласие уже было
+    if (already) return;                           // баннер уже закрывали — не показываем
+    showBanner();                                  // первый визит — показываем уведомление
+  }
+
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', init);
+  } else { init(); }
+})();
+</script>
 
 </body>
 </html>
