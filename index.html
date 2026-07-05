@@ -2,77 +2,532 @@
 <html lang="ru">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-<title>Апдейт</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Обсуждение</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-:root{--accent:#eb6941;--text:#1A1A1A;--bg:#ffffff}
-html,body{height:100%;background:var(--bg);font-family:'Montserrat',sans-serif;font-weight:300;color:var(--text);overflow:hidden}
-body{display:flex;justify-content:center;padding:max(20px,env(safe-area-inset-top)) 20px max(20px,env(safe-area-inset-bottom)) 20px}
-.wrap{width:100%;max-width:600px;height:100%;display:flex;flex-direction:column;position:relative}
-.bar{height:4px;background:#f0f0f0;border-radius:9px;overflow:hidden;flex-shrink:0;margin-bottom:16px}
-.barFill{height:100%;width:0%;background:var(--accent);border-radius:9px;transition:width .5s}
-.view{flex:1;position:relative;overflow:hidden}
-.scr{position:absolute;inset:0;display:flex;flex-direction:column;opacity:0;transform:translateY(16px);pointer-events:none;transition:opacity .45s,transform .45s}
-.scr.on{opacity:1;transform:none;pointer-events:auto}
-.body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:8px 2px 24px 2px}
-.body p{font-size:20px;line-height:1.65;margin-bottom:16px}
-.body ul{padding-left:24px;margin-bottom:16px}
-.body li{font-size:20px;line-height:1.6;margin-bottom:8px;font-style:italic;color:#444}
-.foot{flex-shrink:0;padding:12px 0 4px 0}
-.btn{display:block;width:100%;border:none;background:var(--accent);color:#fff;font-family:'Montserrat',sans-serif;font-weight:500;font-size:18px;padding:18px 0;border-radius:10px;cursor:pointer;box-shadow:0 0 24px rgba(235,105,65,.28);transition:transform .2s,box-shadow .2s;-webkit-tap-highlight-color:transparent}
-.btn:active{transform:scale(.97);box-shadow:0 0 16px rgba(235,105,65,.35)}
-.blob1,.blob2{position:fixed;border-radius:50%;pointer-events:none;z-index:-1}
-.blob1{width:260px;height:260px;background:radial-gradient(circle,rgba(235,105,65,.06) 0%,transparent 70%);top:-60px;right:-80px}
-.blob2{width:300px;height:300px;background:radial-gradient(circle,rgba(235,105,65,.05) 0%,transparent 70%);bottom:-80px;left:-100px}
-@media(max-width:480px){
-body{padding:max(16px,env(safe-area-inset-top)) 16px max(16px,env(safe-area-inset-bottom)) 16px}
-.body p,.body li{font-size:18px}
-.btn{font-size:17px;padding:16px 0}
-}
-@media(min-width:700px){
-.body p,.body li{font-size:22px}
-}
+  :root {
+    --accent: #eb6941;
+    --accent-soft: rgba(235, 105, 65, 0.18);
+    --accent-glow: rgba(235, 105, 65, 0.35);
+    --ink: #1a1a1a;
+    --ink-soft: #4a4a4a;
+    --ink-faint: #8a8a8a;
+    --line: rgba(0, 0, 0, 0.08);
+    --ease-quiet: cubic-bezier(.22, 1, .36, 1);
+    --ease-precise: cubic-bezier(.4, 0, .2, 1);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+    background: #ffffff;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 300;
+    color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body { position: relative; }
+
+  /* ---------- APP SHELL ---------- */
+  .app {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  /* ---------- PROGRESS BAR ---------- */
+  .progress-wrap {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: rgba(0, 0, 0, 0.05);
+    z-index: 50;
+  }
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    background: var(--accent);
+    transition: width 700ms var(--ease-quiet);
+    box-shadow: 0 0 12px var(--accent-glow);
+  }
+
+  /* progress dots (decorative top-right) */
+  .progress-dots {
+    position: absolute;
+    top: 18px;
+    right: 22px;
+    display: flex;
+    gap: 6px;
+    z-index: 50;
+  }
+  .progress-dots .dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.12);
+    transition: background 400ms var(--ease-quiet), transform 400ms var(--ease-quiet);
+  }
+  .progress-dots .dot.active {
+    background: var(--accent);
+    transform: scale(1.3);
+    box-shadow: 0 0 8px var(--accent-glow);
+  }
+  .progress-dots .dot.done {
+    background: rgba(235, 105, 65, 0.5);
+  }
+
+  /* ---------- SCREENS CONTAINER ---------- */
+  .screens {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 600ms var(--ease-quiet);
+  }
+  .screen.is-active {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .screen__inner {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding: 4.5rem 1.75rem 9rem;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .screen__inner::-webkit-scrollbar { display: none; }
+
+  .screen.scroll .screen__inner {
+    justify-content: flex-start;
+  }
+
+  /* white fade at bottom for scrollable screens */
+  .screen__fade {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    height: 80px;
+    background: linear-gradient(to top, #ffffff 0%, rgba(255,255,255,0.85) 50%, rgba(255,255,255,0) 100%);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 400ms var(--ease-quiet);
+    z-index: 5;
+  }
+  .screen.scroll .screen__fade { opacity: 1; }
+
+  /* ---------- BODY CONTENT ---------- */
+  .body {
+    max-width: 520px;
+    width: 100%;
+    margin: 0 auto;
+  }
+
+  .body p {
+    font-size: 17px;
+    line-height: 1.75;
+    color: var(--ink-soft);
+    margin-bottom: 1.1rem;
+    font-weight: 300;
+  }
+
+  .body p strong {
+    font-weight: 700;
+    color: var(--ink);
+    letter-spacing: -0.01em;
+  }
+
+  .body p.lead {
+    font-size: 19px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+
+  .body p.lead strong {
+    color: var(--ink);
+  }
+
+  .body .examples {
+    background: rgba(235, 105, 65, 0.04);
+    border-left: 2px solid var(--accent);
+    border-radius: 0 12px 12px 0;
+    padding: 1rem 1.1rem 1rem 1.25rem;
+    margin: 1.25rem 0;
+  }
+  .body .examples .ex-label {
+    font-size: 11px;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: var(--accent);
+    margin-bottom: 0.6rem;
+    display: block;
+  }
+  .body .examples p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    margin-bottom: 0.45rem;
+  }
+  .body .examples p:last-child { margin-bottom: 0; }
+
+  /* decorative accent line at top of body */
+  .body::before {
+    content: '';
+    display: block;
+    width: 32px;
+    height: 2px;
+    background: var(--accent);
+    margin-bottom: 1.75rem;
+    box-shadow: 0 0 8px var(--accent-glow);
+    opacity: 0;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: opacity 800ms var(--ease-quiet) 200ms, transform 800ms var(--ease-quiet) 200ms;
+  }
+  .screen.is-active .body::before {
+    opacity: 1;
+    transform: scaleX(1);
+  }
+
+  /* stagger paragraphs */
+  .body > * {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 700ms var(--ease-quiet), transform 700ms var(--ease-quiet);
+  }
+  .screen.is-active .body > * {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .screen.is-active .body > *:nth-child(1) { transition-delay: 300ms; }
+  .screen.is-active .body > *:nth-child(2) { transition-delay: 420ms; }
+  .screen.is-active .body > *:nth-child(3) { transition-delay: 540ms; }
+  .screen.is-active .body > *:nth-child(4) { transition-delay: 660ms; }
+  .screen.is-active .body > *:nth-child(5) { transition-delay: 780ms; }
+  .screen.is-active .body > *:nth-child(6) { transition-delay: 900ms; }
+  .screen.is-active .body > *:nth-child(7) { transition-delay: 1020ms; }
+  .screen.is-active .body > *:nth-child(8) { transition-delay: 1140ms; }
+
+  /* ---------- BUTTON (fixed bottom) ---------- */
+  .button-wrap {
+    position: absolute;
+    left: 0; right: 0; bottom: 0;
+    padding: 1.5rem 1.75rem 2rem;
+    background: linear-gradient(to top, #ffffff 60%, rgba(255,255,255,0.7) 100%);
+    z-index: 20;
+  }
+
+  .btn {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    padding: 1.15rem 1.5rem;
+    background: var(--accent);
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    cursor: pointer;
+    box-shadow: 0 6px 22px var(--accent-glow), 0 2px 6px rgba(235, 105, 65, 0.2);
+    transition: transform 250ms var(--ease-precise),
+                box-shadow 300ms var(--ease-precise),
+                background 250ms var(--ease-precise);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .btn::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.18) 50%, transparent 70%);
+    transform: translateX(-100%);
+    transition: transform 600ms var(--ease-quiet);
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px var(--accent-glow), 0 4px 10px rgba(235, 105, 65, 0.28);
+    background: #ed7050;
+  }
+  .btn:hover::after { transform: translateX(100%); }
+  .btn:active {
+    transform: translateY(0);
+    box-shadow: 0 3px 12px var(--accent-glow);
+    background: #d85a36;
+  }
+
+  .btn .arrow {
+    display: inline-block;
+    transition: transform 250ms var(--ease-precise);
+  }
+  .btn:hover .arrow { transform: translateX(4px); }
+
+  /* ---------- DECORATIVE ACCENT ORB ---------- */
+  .deco-orb {
+    position: absolute;
+    pointer-events: none;
+    border-radius: 50%;
+    filter: blur(60px);
+    opacity: 0.5;
+    z-index: 0;
+  }
+  .deco-orb--1 {
+    width: 220px; height: 220px;
+    top: -60px; left: -80px;
+    background: rgba(235, 105, 65, 0.12);
+  }
+  .deco-orb--2 {
+    width: 280px; height: 280px;
+    bottom: -100px; right: -100px;
+    background: rgba(235, 105, 65, 0.08);
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (min-width: 640px) {
+    .body p { font-size: 18px; }
+    .body p.lead { font-size: 21px; }
+    .btn { font-size: 17px; }
+  }
+
+  @media (max-width: 360px) {
+    .body p { font-size: 16px; }
+    .body p.lead { font-size: 18px; }
+    .screen__inner { padding: 4rem 1.4rem 8.5rem; }
+    .button-wrap { padding: 1.2rem 1.4rem 1.6rem; }
+  }
+
+  /* reduced motion */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      transition-duration: 0.01ms !important;
+      animation-duration: 0.01ms !important;
+    }
+  }
 </style>
 </head>
 <body>
-<div class="blob1"></div>
-<div class="blob2"></div>
-<div class="wrap">
-<div class="bar"><div class="barFill" id="bf"></div></div>
-<div class="view" id="vw"></div>
+
+<div class="app">
+  <!-- Progress bar -->
+  <div class="progress-wrap">
+    <div class="progress-bar" id="progressBar"></div>
+  </div>
+
+  <!-- Progress dots -->
+  <div class="progress-dots" id="progressDots">
+    <span class="dot active"></span>
+    <span class="dot"></span>
+    <span class="dot"></span>
+    <span class="dot"></span>
+    <span class="dot"></span>
+    <span class="dot"></span>
+  </div>
+
+  <!-- Decorative orbs -->
+  <div class="deco-orb deco-orb--1"></div>
+  <div class="deco-orb deco-orb--2"></div>
+
+  <div class="screens" id="screens">
+
+    <!-- Screen 1 -->
+    <section class="screen is-active" data-index="0">
+      <div class="screen__inner">
+        <div class="body">
+          <p class="lead"><strong>Мы принимаем от сотен до тысяч решений каждый день!</strong></p>
+          <p>Но не всегда осознаем, как они формируют нас и наших близких.</p>
+        </div>
+      </div>
+      <div class="button-wrap">
+        <button class="btn" data-next>Дальше <span class="arrow">→</span></button>
+      </div>
+    </section>
+
+    <!-- Screen 2 -->
+    <section class="screen" data-index="1">
+      <div class="screen__inner">
+        <div class="body">
+          <p class="lead"><strong>Сейчас будет 3 этапа обсуждения.</strong></p>
+          <p>Они помогут заново обнаружить то, что у вас итак уже есть.</p>
+          <p><strong>Проходите вместе</strong>: своей парой / семьей / друзьями.</p>
+          <p>Нажимайте «начать», когда будете готовы!</p>
+        </div>
+      </div>
+      <div class="button-wrap">
+        <button class="btn" data-next>Начать <span class="arrow">→</span></button>
+      </div>
+    </section>
+
+    <!-- Screen 3 (scroll) -->
+    <section class="screen scroll" data-index="2">
+      <div class="screen__inner">
+        <div class="body">
+          <p class="lead"><strong>Восстановим кусочек вашего дня!</strong></p>
+          <p>Посмотрите друг на друга.</p>
+          <p>Вспомните каждый минимум 5 конкретных моментов за сегодня, когда человек, с которым вы сейчас это проходите, сделал для вас что-то маленькое, но реальное.</p>
+          <p>Любые действия, которые вам помогали сегодня, даже самые мелочи.</p>
+          <div class="examples">
+            <span class="ex-label">Например</span>
+            <p>• «когда мы шли там-то, ты озвучил мою мысль…»</p>
+            <p>• «ты посмеялась, когда я…»</p>
+            <p>• «ты занял место в очереди, пока я…»</p>
+          </div>
+          <p><strong>Чем больше, тем лучше!</strong></p>
+          <p>Поделитесь ими друг с другом по очереди.</p>
+          <p><strong>Как обсудите — переходите дальше.</strong></p>
+        </div>
+      </div>
+      <div class="screen__fade"></div>
+      <div class="button-wrap">
+        <button class="btn" data-next>Дальше <span class="arrow">→</span></button>
+      </div>
+    </section>
+
+    <!-- Screen 4 (scroll) -->
+    <section class="screen scroll" data-index="3">
+      <div class="screen__inner">
+        <div class="body">
+          <p class="lead">Теперь поделитесь по очереди как эти моменты повлияли на вас.</p>
+          <p><strong>Не оценивайте</strong> «хорошо / плохо / приятно / итд».</p>
+          <p><strong>Просто опишите</strong>, что с вами происходило.</p>
+          <div class="examples">
+            <span class="ex-label">Например</span>
+            <p>• «ты выбрала шатер, и мне не пришлось думать куда идти дальше»</p>
+            <p>• «меня подождали, и я почувствовал что мы движемся в одном темпе»</p>
+            <p>• «ты прошел со мной ту активность — я чувствовала, что не одна»</p>
+          </div>
+        </div>
+      </div>
+      <div class="screen__fade"></div>
+      <div class="button-wrap">
+        <button class="btn" data-next>Дальше <span class="arrow">→</span></button>
+      </div>
+    </section>
+
+    <!-- Screen 5 -->
+    <section class="screen" data-index="4">
+      <div class="screen__inner">
+        <div class="body">
+          <p class="lead">Посмотрите на все эти моменты еще раз.</p>
+          <p><strong>Вряд ли это случайности!</strong></p>
+          <p>Вы уже делаете похожие вещи друг для друга в разных ситуациях.</p>
+          <p>Вспомните подобные моменты в другие дни, других контекстах.</p>
+          <p><strong>Обсудите между собой</strong>, какие тенденции проявляются в себе и друг друге.</p>
+        </div>
+      </div>
+      <div class="button-wrap">
+        <button class="btn" data-next>Дальше <span class="arrow">→</span></button>
+      </div>
+    </section>
+
+    <!-- Screen 6 (final) -->
+    <section class="screen" data-index="5">
+      <div class="screen__inner">
+        <div class="body">
+          <p class="lead"><strong>Надеемся, небольшой апдейт произошел!</strong></p>
+          <p>Подобные мелкие привычки незаметно создают нашу реальность.</p>
+          <p style="color: var(--ink-faint); font-style: italic;">(А иногда и реальность другого!)</p>
+          <p style="color: var(--ink-faint); font-style: italic;">(И сколько еще таких привычек!)</p>
+          <p><strong>Подходите к нам для финальной части апдейта!</strong></p>
+        </div>
+      </div>
+      <div class="button-wrap">
+        <button class="btn" id="restartBtn">Пройти заново</button>
+      </div>
+    </section>
+
+  </div>
 </div>
+
 <script>
-const slides=[
-{text:`<p>Мы принимаем от сотен до тысяч решений каждый день!</p><p>Но не всегда осознаем, как они формируют нас и наших близких.</p>`,btn:"Дальше →"},
-{text:`<p>Сейчас будет 3 этапа обсуждения.</p><p>Они помогут заново обнаружить то, что у вас итак уже есть.</p><p>Проходите вместе: своей парой / семьей / друзьями.</p><p>Нажимайте «начать», когда будете готовы!</p>`,btn:"Начать"},
-{text:`<p>Восстановим кусочек вашего дня!</p><p>Посмотрите друг на друга.</p><p>Вспомните каждый минимум 5 конкретных моментов за сегодня, когда человек, с которым вы сейчас это проходите, сделал для вас что-то маленькое, но реальное.</p><p>Любые действия, которые вам помогали сегодня, даже самые мелочи.</p><p>Например:</p><ul><li>«когда мы шли там-то, ты озвучил мою мысль…»</li><li>«ты посмеялась, когда я…»</li><li>«ты занял место в очереди, пока я…»</li></ul><p>Чем больше, тем лучше!</p><p>Поделитесь ими друг с другом по очереди.</p>`,btn:"Дальше →"},
-{text:`<p>Теперь поделитесь по очереди как эти моменты повлияли на вас.</p><p>Не оценивайте «хорошо / плохо / приятно / итд».</p><p>Просто опишите, что с вами происходило. Например:</p><ul><li>«ты выбрала шатер, и мне не пришлось думать куда идти дальше»</li><li>«меня подождали, и я почувствовал что мы движемся в одном темпе»</li><li>«ты прошел со мной ту активность — я чувствовала, что не одна»</li></ul>`,btn:"Дальше →"},
-{text:`<p>Посмотрите на все эти моменты еще раз.</p><p>Вряд ли это случайности!</p><p>Вы уже делаете похожие вещи друг для друга в разных ситуациях.</p><p>Вспомните подобные моменты в другие дни, других контекстах.</p><p>Обсудите между собой, какие тенденции проявляются в себе и друг друге.</p>`,btn:"Дальше →"},
-{text:`<p>Надеемся, небольшой апдейт произошел!</p><p>Подобные мелкие привычки незаметно создают нашу реальность.</p><p>(А иногда и реальность другого!)</p><p>(И сколько еще таких привычек!)</p><p>Подходите к нам для финальной части апдейта!</p>`,btn:null}
-];
-const vw=document.getElementById('vw');
-const bf=document.getElementById('bf');
-let cur=0;
-function render(){
-vw.innerHTML='';
-slides.forEach((s,i)=>{
-const d=document.createElement('div');
-d.className='scr'+(i===cur?' on':'');
-let h='<div class="body">'+s.text+'</div>';
-if(s.btn){h+='<div class="foot"><button class="btn">'+s.btn+'</button></div>';}
-d.innerHTML=h;
-vw.appendChild(d);
-});
-bf.style.width=(cur/(slides.length-1)*100)+'%';
-document.querySelectorAll('.btn').forEach(b=>b.onclick=()=>{
-if(cur<slides.length-1){cur++;render();try{navigator.vibrate(12)}catch(e){}}
-});
-}
-render();
+  (function() {
+    const screens = Array.from(document.querySelectorAll('.screen'));
+    const progressBar = document.getElementById('progressBar');
+    const dots = Array.from(document.querySelectorAll('#progressDots .dot'));
+    const total = screens.length;
+    let current = 0;
+
+    function updateProgress() {
+      const pct = ((current) / (total - 1)) * 100;
+      progressBar.style.width = pct + '%';
+
+      dots.forEach((d, i) => {
+        d.classList.remove('active', 'done');
+        if (i < current) d.classList.add('done');
+        else if (i === current) d.classList.add('active');
+      });
+    }
+
+    function goTo(index) {
+      if (index < 0 || index >= total) return;
+      // reset scroll of outgoing scrollable screen
+      const outgoing = screens[current];
+      const outInner = outgoing.querySelector('.screen__inner');
+      if (outInner) outInner.scrollTop = 0;
+
+      screens[current].classList.remove('is-active');
+      current = index;
+      screens[current].classList.add('is-active');
+
+      // reset scroll of incoming
+      const inInner = screens[current].querySelector('.screen__inner');
+      if (inInner) inInner.scrollTop = 0;
+
+      updateProgress();
+    }
+
+    // wire next buttons
+    document.querySelectorAll('[data-next]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const next = current + 1;
+        if (next < total) goTo(next);
+      });
+    });
+
+    // restart
+    const restart = document.getElementById('restartBtn');
+    if (restart) {
+      restart.addEventListener('click', () => goTo(0));
+    }
+
+    // keyboard navigation
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' && current < total - 1) goTo(current + 1);
+      if (e.key === 'ArrowLeft' && current > 0) goTo(current - 1);
+    });
+
+    // init
+    updateProgress();
+  })();
 </script>
+
 </body>
 </html>
